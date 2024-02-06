@@ -8,27 +8,23 @@ from selenium.webdriver.firefox.service import Service
 from selenium.common.exceptions import StaleElementReferenceException
 import pymongo as py
 import json
+import time
 
 #########################################################################
 
-s = Service("/Web_Scraping_Stockage/firefox_driver/geckodriver")
-
+driver_path = "./geckodriver"
+s = Service(driver_path)
 driver = Firefox(service=s)
-
 url = "https://bfin.brvm.org/Activites_marche.aspx"
-
+driver.get(url)
 page = requests.get(url)
 
-driver.get(url)
-
-
 
 #########################################################################
 
 
-client = py.MongoClient("mongodb+srv://brvm:Mwg4c2kpDBiRRqd@cluster0.asktaui.mongodb.net/?retryWrites=true&w=majority")
-db = client.brvm
-
+client = py.MongoClient("mongodb://localhost:27017")
+db = client.brvm 
 
 
 #########################################################################
@@ -42,19 +38,22 @@ select_date = Select(driver.find_element(By.XPATH, '//select[@id="ctl00_Main_Dro
 
 options = select_date.options
 
-"""
-dt = []
+
+
+""" dt = []
 for i in range(len(options)):
     dt.append(options[i].text)
 
-print(dt.index('22/09/2009')) #2853
-print(len(options)) #5889
-driver.quit()
+print(dt.index('26/12/2023')) #21
+#print(len(options)) #5889
+#print(dt[0])
+driver.quit() """
 
 
-"""
+ 
+for index in range(23, 3001):
 
-for index in range(1):
+    time.sleep(5)
 
     table = soup.find('table', id='ctl00_Main_GridView1')
 
@@ -89,6 +88,8 @@ for index in range(1):
 
 
     except StaleElementReferenceException as e:
+        
+        time.sleep(5)
 
         select_date = Select(driver.find_element(By.XPATH, '//select[@id="ctl00_Main_DropDownList1"]'))
         options = select_date.options
@@ -121,5 +122,4 @@ for index in range(1):
             records = json.loads(records)
             db.actions.insert_many(records)
 
-driver.quit()
-
+driver.quit() 
